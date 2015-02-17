@@ -122,7 +122,9 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
             self.uri = QgsDataSourceURI()
             self.uri.setConnection(host, port, database, pgUsername, pgPassword)
             self.connection = connector.PostGisDBConnector(self.uri)
-            geotablesList = self.connection.getVectorTables(schema)
+            vectorTablesList = self.connection.getVectorTables(schema)
+            rasterTablesList = self.connection.getRasterTables(schema)
+            geotablesList = vectorTablesList + rasterTablesList
         except ConnectionError:
             QtGui.QMessageBox.information( self,
                                             utils.tr( "Connection failed" ),
@@ -146,14 +148,18 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
                 else:
                     continue
                 
-                layerProperty['table_type'] = geotable[9]
-                layerProperty['table_srid'] = str(geotable[11])
+                if geotable in vectorTablesList:
+                    layerProperty['table_type'] = geotable[9]
+                    layerProperty['table_srid'] = str(geotable[11])
+                else:
+                    layerProperty['table_type'] = "RASTER"
+                    layerProperty['table_srid'] = str(geotable[13])
                 layerProperty['geometry_column'] = geotable[8]
                 layerProperty['table_schema'] = geotable[2]
                 
                 self.layersModel.addTableEntry(layerProperty)
                 self.btnOpen.setDisabled(False)
-            
+                
                 
         self.btnConnect.setText(originalText)
         self.btnConnect.setEnabled(True)
@@ -180,9 +186,16 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
             self.uri.setDataSource(uriInfo['table_schema'], uriInfo['table_name'], uriInfo['geometry_column'], "")
    
             # Add to QGIS
-            vlayer = QgsVectorLayer(self.uri.uri(), uriInfo['layer_name'], "postgres")
-            QgsMapLayerRegistry.instance().addMapLayer(vlayer)
-        
+            if uriInfo["spatial_type"] == "RASTER":
+                gdalUri = "PG: dbname="+self.uri.database()+" host="+self.uri.host()+" user="+self.uri.username()
+                gdalUri = gdalUri +" password="+self.uri.password()+" port="+self.uri.port()+" mode=2"
+                gdalUri = gdalUri +" schema="+self.uri.schema()+" column="+self.uri.geometryColumn()
+                gdalUri = gdalUri +" table="+self.uri.table() 
+                layer = QgsRasterLayer(gdalUri, uriInfo['layer_name'], "gdal")
+            else:
+                layer = QgsVectorLayer(self.uri.uri(), uriInfo['layer_name'], "postgres")
+            QgsMapLayerRegistry.instance().addMapLayer(layer)
+            
         if not self.mHoldDialogOpen.isChecked():
             self.closeDialog()
        

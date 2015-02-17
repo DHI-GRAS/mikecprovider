@@ -69,6 +69,7 @@ class mikecTableModel(QtGui.QStandardItemModel):
             return None
         
         uriInfo["layer_name"] = index.sibling( index.row(), 0 ).data()
+        uriInfo["spatial_type"] = index.sibling( index.row(), 2 ).data()
         uriInfo["table_name"] = index.sibling( index.row(), 5 ).data()
         uriInfo["table_schema"] = index.sibling( index.row(), 6 ).data()
         uriInfo["geometry_column"] = index.sibling( index.row(), 7 ).data()
