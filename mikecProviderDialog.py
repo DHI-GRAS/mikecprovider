@@ -170,6 +170,11 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
         if not self.layersView.selectionModel().selection().indexes():
             QtGui.QMessageBox.information( self, utils.tr( "Select Table" ), utils.tr( "You must select a table in order to add a layer." ) )
         
+        originalText = self.btnOpen.text()
+        self.btnOpen.setText(utils.tr("Loading..."))
+        self.btnOpen.setEnabled(False)
+        self.btnOpen.repaint()
+        
         loadedRows = []
         for index in self.layersView.selectionModel().selection().indexes():
             
@@ -198,6 +203,9 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
             
         if not self.mHoldDialogOpen.isChecked():
             self.closeDialog()
+        else:
+            self.btnOpen.setText(originalText)
+            self.btnOpen.setEnabled(True)
        
         
     def newConnectionDialog(self):
