@@ -201,12 +201,12 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
                 layer = QgsVectorLayer(self.uri.uri(), uriInfo['layer_name'], "postgres")
             QgsMapLayerRegistry.instance().addMapLayer(layer)
             
+        self.btnOpen.setText(originalText)
+        self.btnOpen.setEnabled(True)
+        
         if not self.mHoldDialogOpen.isChecked():
             self.closeDialog()
-        else:
-            self.btnOpen.setText(originalText)
-            self.btnOpen.setEnabled(True)
-       
+                 
         
     def newConnectionDialog(self):
         connectionDialog = mikecConnectionDialog(self, None)
