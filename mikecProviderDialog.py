@@ -22,7 +22,8 @@
 """
 
 import os
-from processing.algs.qgis import postgis_utils
+from db_manager.db_plugins.postgis import connector
+from db_manager.db_plugins.plugin import ConnectionError
 from mikecConnectionDialog import mikecConnectionDialog
 from mikecUtils import mikecUtils as utils
 from mikecTableModel import mikecTableModel
@@ -118,10 +119,11 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
         
         # Retrieve the geotables from postgis database
         try:
-            port = int(port)
-            self.connection = postgis_utils.GeoDB(host, port, database, pgUsername, pgPassword)
-            geotablesList = self.connection.list_geotables(schema)
-        except postgis_utils.DbError:
+            self.uri = QgsDataSourceURI()
+            self.uri.setConnection(host, port, database, pgUsername, pgPassword)
+            self.connection = connector.PostGisDBConnector(self.uri)
+            geotablesList = self.connection.getVectorTables(schema)
+        except ConnectionError:
             QtGui.QMessageBox.information( self,
                                             utils.tr( "Connection failed" ),
                                             utils.tr( "Connection failed - Check settings and try again.\n\n" ) )
@@ -135,7 +137,7 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
         if self.connection and layersInfoList:
             for geotable in geotablesList:
                 layerProperty = {}
-                layerProperty['table_name'] = geotable[0]
+                layerProperty['table_name'] = geotable[1]
                 layerInfo = next((item for item in layersInfoList if item["Table"] == layerProperty['table_name']), None)
                 if layerInfo:
                     layerProperty['layer_name'] = layerInfo["Name"]
@@ -144,10 +146,10 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
                 else:
                     continue
                 
-                layerProperty['table_type'] = geotable[7]
-                layerProperty['table_srid'] = str(geotable[9])
-                layerProperty['geometry_column'] = geotable[6]
-                layerProperty['table_schema'] = geotable[1]
+                layerProperty['table_type'] = geotable[9]
+                layerProperty['table_srid'] = str(geotable[11])
+                layerProperty['geometry_column'] = geotable[8]
+                layerProperty['table_schema'] = geotable[2]
                 
                 self.layersModel.addTableEntry(layerProperty)
                 self.btnOpen.setDisabled(False)
@@ -172,17 +174,13 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
                 loadedRows.append(index.row())
             
             # Prepare layer URI  
-            uri = QgsDataSourceURI()
-            #set host name, port, database name, username and password
-            uri.setConnection(self.connection.host, str(self.connection.port), self.connection.dbname, 
-                              self.connection.user, self.connection.passwd)
-            # set database schema, table name, geometry column and optionally
+            # Set database schema, table name, geometry column and optionally
             # subset (WHERE clause)
             uriInfo = self.layersModel.getLayerUriInfo( index )
-            uri.setDataSource(uriInfo['table_schema'], uriInfo['table_name'], uriInfo['geometry_column'], "")
-
+            self.uri.setDataSource(uriInfo['table_schema'], uriInfo['table_name'], uriInfo['geometry_column'], "")
+   
             # Add to QGIS
-            vlayer = QgsVectorLayer(uri.uri(), uriInfo['layer_name'], "postgres")
+            vlayer = QgsVectorLayer(self.uri.uri(), uriInfo['layer_name'], "postgres")
             QgsMapLayerRegistry.instance().addMapLayer(vlayer)
         
         if not self.mHoldDialogOpen.isChecked():
