@@ -22,6 +22,7 @@
 """
 
 import os
+import re
 from db_manager.db_plugins.postgis import connector
 from db_manager.db_plugins.plugin import ConnectionError
 from mikecConnectionDialog import mikecConnectionDialog
@@ -30,7 +31,7 @@ from mikecTableModel import mikecTableModel
 
 from PyQt4 import QtGui, uic, QtCore
 from qgis.core import *
-from qgis.gui import QgsCredentialDialog
+from qgis.gui import QgsCredentialDialog, QgsSublayersDialog
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'mikec_dbsourceselector_dialog_base.ui'))
@@ -164,6 +165,36 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
         self.btnConnect.setText(originalText)
         self.btnConnect.setEnabled(True)
     
+    # Function of loading sublayers of raster layers (rows of a table with GDAL PG mode = 1)
+    def loadSubLayers(self, rl):
+        tableContent = []
+        subLayers = []
+        subLayerNum = 0
+        layerName = rl.name()
+        # simplify raster sublayer name
+        for subLayer in rl.subLayers():
+            subLayer = re.sub("^.*where=", "", subLayer)
+            subLayer.replace("'", "")
+            subLayer.replace('"', "")      
+            tableContent.append(str(subLayerNum)+"|"+subLayer)
+            subLayers.append(subLayer) 
+            subLayerNum = subLayerNum + 1
+                    
+        # Use QgsSublayersDialog to select sublayers to load
+        chooseSublayersDialog = QgsSublayersDialog(QgsSublayersDialog.Gdal, "gdal") 
+        chooseSublayersDialog.populateLayerTable( tableContent, "|" )
+        chooseSublayersDialog.resize(500, chooseSublayersDialog.height())
+        if chooseSublayersDialog.exec_():
+            baseSourceStr = rl.source()
+            # Enclose where statement in appropriate quotes
+            for i in chooseSublayersDialog.selectionIndexes(): 
+                subLayer = subLayers[i]
+                subLayer = re.sub("= ", "= \\'", subLayer)
+                subLayer = re.sub("'$", "\\''", subLayer)
+                gdalStr = baseSourceStr + " where="+subLayer
+                rl = QgsRasterLayer(gdalStr, layerName + '_'+subLayers[i])
+                QgsMapLayerRegistry.instance().addMapLayer(rl)
+        
     # Slot for performing action when the Load button is clicked   
     def loadLayer(self):
         
@@ -193,13 +224,17 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
             # Add to QGIS
             if uriInfo["spatial_type"] == "RASTER":
                 gdalUri = "PG: dbname="+self.uri.database()+" host="+self.uri.host()+" user="+self.uri.username()
-                gdalUri = gdalUri +" password="+self.uri.password()+" port="+self.uri.port()+" mode=2"
+                gdalUri = gdalUri +" password="+self.uri.password()+" port="+self.uri.port()+" mode=1"
                 gdalUri = gdalUri +" schema="+self.uri.schema()+" column="+self.uri.geometryColumn()
                 gdalUri = gdalUri +" table="+self.uri.table() 
                 layer = QgsRasterLayer(gdalUri, uriInfo['layer_name'], "gdal")
+                if layer and layer.dataProvider().name() == "gdal" and len(layer.subLayers()) > 1:
+                    self.loadSubLayers(layer)
+                else:
+                    QgsMapLayerRegistry.instance().addMapLayer(layer)
             else:
                 layer = QgsVectorLayer(self.uri.uri(), uriInfo['layer_name'], "postgres")
-            QgsMapLayerRegistry.instance().addMapLayer(layer)
+                QgsMapLayerRegistry.instance().addMapLayer(layer)
             
         self.btnOpen.setText(originalText)
         self.btnOpen.setEnabled(True)
