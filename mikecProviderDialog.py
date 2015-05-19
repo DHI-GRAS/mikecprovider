@@ -165,7 +165,7 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
         self.btnConnect.setText(originalText)
         self.btnConnect.setEnabled(True)
     
-    # Function of loading sublayers of raster layers (rows of a table with GDAL PG mode = 1)
+    # Function for loading sublayers of raster layers (rows of a table with GDAL PG mode = 1)
     def loadSubLayers(self, rl):
         tableContent = []
         subLayers = []
