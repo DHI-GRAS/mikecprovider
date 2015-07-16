@@ -161,7 +161,8 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
                 self.layersModel.addTableEntry(layerProperty)
                 self.btnOpen.setDisabled(False)
                 
-                
+        
+        self.connection = None        
         self.btnConnect.setText(originalText)
         self.btnConnect.setEnabled(True)
     
