@@ -30,6 +30,7 @@ import os.path
 class mikecprovider:
     """QGIS Plugin Implementation."""
 
+
     def __init__(self, iface):
     
     
@@ -59,7 +60,10 @@ class mikecprovider:
                 QCoreApplication.installTranslator(self.translator)
 
         # Create the dialog (after translation) and keep reference
-        self.dlg = mikecProviderDialog()
+        # loadedLayers keeps references to loaded MikeCLayers to prevent them beeing
+        # cleaned by garbage collector.
+        self.loadedLayers = []
+        self.dlg = mikecProviderDialog(self.loadedLayers)
 
         # Declare instance attributes
         self.actions = []
