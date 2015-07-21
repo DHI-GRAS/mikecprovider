@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>592</width>
-    <height>476</height>
+    <height>569</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,40 +25,6 @@
    <bool>true</bool>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="2" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="mHoldDialogOpen">
-       <property name="text">
-        <string>Keep dialog open</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="4" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Close|QDialogButtonBox::Help|QDialogButtonBox::Open</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QTableView" name="layersView"/>
-   </item>
    <item row="0" column="0">
     <widget class="QGroupBox" name="connectionsGroupBox">
      <property name="title">
@@ -133,6 +99,33 @@
      </layout>
     </widget>
    </item>
+   <item row="1" column="0">
+    <widget class="QTableView" name="layersView"/>
+   </item>
+   <item row="2" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="mHoldDialogOpen">
+       <property name="text">
+        <string>Keep dialog open</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="3" column="0">
     <widget class="QGroupBox" name="mSearchGroupBox">
      <property name="title">
@@ -167,21 +160,22 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QLabel" name="mSearchModeLabel">
+      <item row="2" column="2">
+       <widget class="QComboBox" name="mSearchModeComboBox">
         <property name="enabled">
          <bool>true</bool>
         </property>
-        <property name="text">
-         <string>Search mode</string>
-        </property>
-        <property name="buddy">
-         <cstring>mSearchModeComboBox</cstring>
+       </widget>
+      </item>
+      <item row="0" column="1" colspan="2">
+       <widget class="QLineEdit" name="mSearchTableEdit">
+        <property name="enabled">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <widget class="QComboBox" name="mSearchModeComboBox">
+      <item row="1" column="2">
+       <widget class="QComboBox" name="mSearchColumnComboBox">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -200,22 +194,45 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QComboBox" name="mSearchColumnComboBox">
+      <item row="2" column="0" colspan="2">
+       <widget class="QLabel" name="mSearchModeLabel">
         <property name="enabled">
          <bool>true</bool>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="1" colspan="2">
-       <widget class="QLineEdit" name="mSearchTableEdit">
-        <property name="enabled">
-         <bool>true</bool>
+        <property name="text">
+         <string>Search mode</string>
+        </property>
+        <property name="buddy">
+         <cstring>mSearchModeComboBox</cstring>
         </property>
        </widget>
       </item>
      </layout>
     </widget>
+   </item>
+   <item row="4" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetMinimumSize</enum>
+     </property>
+     <property name="topMargin">
+      <number>5</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="btnImportRaster">
+       <property name="text">
+        <string>Import raster</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Close|QDialogButtonBox::Help|QDialogButtonBox::Open</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
@@ -230,7 +247,6 @@
   <tabstop>mSearchTableEdit</tabstop>
   <tabstop>mSearchColumnComboBox</tabstop>
   <tabstop>mSearchModeComboBox</tabstop>
-  <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
  <connections>

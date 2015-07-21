@@ -26,6 +26,7 @@ import re
 from db_manager.db_plugins.postgis import connector
 from db_manager.db_plugins.plugin import ConnectionError
 from mikecConnectionDialog import mikecConnectionDialog
+from mikecImportRasterDialog import mikecImportRasterDialog
 from mikecUtils import mikecUtils as utils
 from mikecTableModel import mikecTableModel
 from mikecLayer import MikecLayer
@@ -65,6 +66,9 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
         self.btnOpen = self.buttonBox.button(QtGui.QDialogButtonBox.Open)
         self.btnOpen.setDisabled(True)
         self.btnOpen.clicked.connect(self.loadLayer)
+        
+        self.btnImportRaster.setDisabled(True)
+        self.btnImportRaster.clicked.connect(self.importRaster)
         
         self.btnConnect.clicked.connect(self.populateLayersView)
         self.btnNew.clicked.connect(self.newConnectionDialog)
@@ -166,6 +170,7 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
                 
                 self.layersModel.addTableEntry(layerProperty)
                 self.btnOpen.setDisabled(False)
+                self.btnImportRaster.setDisabled(False)
                 
         
         self.connection = None        
@@ -284,9 +289,26 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
         self.connection = None
         self.setLayersView()
         self.btnOpen.setDisabled(True)
+        self.btnImportRaster.setDisabled(True)
         self.close()
         
     def reject(self):
         self.closeDialog()
         super(mikecProviderDialog, self).reject()
+        
+    def importRaster(self):
+        
+        # Get connection details of the currently selected connection
+        settings = QtCore.QSettings()
+        connection = {}
+        key = utils.baseKey + self.cmbConnections.currentText()
+        connection["host"] = settings.value(key + '/host')
+        connection["database"] = settings.value(key + '/database')
+        connection["port"] = settings.value(key + '/port')
+        connection["workspace"] = settings.value(key + '/workspace')
+        connection["username"] = settings.value(key + '/username')
+        connection["password"] = settings.value(key + '/password')
+        
+        importRasterDialog = mikecImportRasterDialog(connection, self)
+        importRasterDialog.exec_()
         

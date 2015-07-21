@@ -71,6 +71,22 @@ class mikecUtils:
                                                             +"\nCheck settings and try again.\n\n" ) )
             
         return proc.returncode, out
+    
+    @staticmethod
+    # Import the raster layer to MIKE C database
+    def importRasterLayer(connection, rasterPath, group):
+        # Prepare and run the mc2qgis command
+        mc2qgisCmd = '-c "database='+connection["database"]+';host='+connection["host"]+';port='+str(connection["port"])+';dbflavour=PostgreSQL"'
+        mc2qgisCmd = mc2qgisCmd +' -u '+connection["username"]+' -p '+connection["password"]+' -w '+connection["workspace"]
+        mc2qgisCmd = mc2qgisCmd+" -v addtif@"+rasterPath+"@"+group
+        returncode, output = mikecUtils.run_mc2qgis(mc2qgisCmd)
+
+        #print output
+
+        if returncode != 0:
+            return False
+        else:
+            return True
         
     
     @staticmethod
