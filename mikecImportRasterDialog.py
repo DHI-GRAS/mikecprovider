@@ -57,7 +57,6 @@ class mikecImportRasterDialog(QtGui.QDialog, FORM_CLASS):
     def accept(self):
         layerPath = self.cmbText.itemData(self.cmbText.currentIndex())
         group = self.lineGroup.displayText()
-        print(layerPath)
         if not utils.importRasterLayer(self.connection, layerPath, group):
             QMessageBox.warning( self,
                utils.tr( "Could not import layer" ),
@@ -72,17 +71,12 @@ class mikecImportRasterDialog(QtGui.QDialog, FORM_CLASS):
         layers = QgsProject.instance().layerTreeRoot().findLayers()
         raster = []
     
-        print "dupa"
-        print layers
         for layer in layers:
-            
             mapLayer = layer.layer()
-            print mapLayer.dataUrl().lower()
             if mapLayer.type() == QgsMapLayer.RasterLayer:
                 
                 if mapLayer.providerType() == 'gdal' and mapLayer.source().lower().endswith(".tif"):  # only TIFF file-based layers
                     raster.append((mapLayer.name(), mapLayer.source()))
-        print raster
         if sorting:
             return sorted(raster,  key=lambda layer: layer[0].lower())
         else:
