@@ -25,17 +25,20 @@ import uuid
 from qgis.core import *
 from qgis.gui import QgsSublayersDialog
 
+from mikecUtils import mikecUtils as utils
+
 logger = lambda msg: QgsMessageLog.logMessage(msg, 'MIKE C Provider', 1)
 
 class MikecLayer():
     
-    def __init__(self, uri, layerName, layerType, loadedLayers):
+    def __init__(self, uri, layerName, layerType, mikecConnection, loadedLayers):
         
         self.uri = uri
-        self.layerName = layerName
+        self.mikecConnection = mikecConnection
         self.addedFeaturesIds = []
         self.changedFeaturesIds = []
         self.loadedLayers = loadedLayers
+        
         
         self.loadedLayers.append(self)
         
@@ -45,13 +48,13 @@ class MikecLayer():
             gdalUri = gdalUri +" password="+self.uri.password()+" port="+self.uri.port()+" mode=1"
             gdalUri = gdalUri +" schema="+self.uri.schema()+" column="+self.uri.geometryColumn()
             gdalUri = gdalUri +" table="+self.uri.table() 
-            self.layer = QgsRasterLayer(gdalUri, self.layerName, "gdal")
+            self.layer = QgsRasterLayer(gdalUri, layerName, "gdal")
             if self.layer and self.layer.dataProvider().name() == "gdal" and len(self.layer.subLayers()) > 1:
                 self.loadSubLayers(self.layer)
             else:
                 QgsMapLayerRegistry.instance().addMapLayer(self.layer)
         else:
-            self.layer = QgsVectorLayer(self.uri.uri(), self.layerName, "postgres")
+            self.layer = QgsVectorLayer(self.uri.uri(), layerName, "postgres")
             
             # Make connections
             self.layer.editingStarted.connect(self.editing_started)
@@ -61,6 +64,7 @@ class MikecLayer():
             self.layer.featureDeleted.connect(self.feature_deleted)
             self.layer.featuresDeleted.connect(self.features_deleted)           
             self.layer.beforeCommitChanges.connect(self.before_commit_changes)
+            self.layer.layerNameChanged.connect(self.layer_name_changed)
             self.layer.layerDeleted.connect(self.layer_deleted)
             
             # Display on canvas
@@ -144,6 +148,9 @@ class MikecLayer():
         self.addedFeaturesIds = []
         self.changedFeaturesIds = []
                  
+    
+    def layer_name_changed(self):
+        utils.changeLayerName(self.mikecConnection, self.uri, self.layer.name())
              
     def layer_deleted(self):
         self.loadedLayers.remove(self)       

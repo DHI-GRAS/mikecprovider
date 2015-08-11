@@ -150,6 +150,7 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
         if self.connection and layersInfoList:
             for geotable in geotablesList:
                 layerProperty = {}
+                layerProperty['mc_connection_name'] = self.cmbConnections.currentText()
                 layerProperty['table_name'] = geotable[1]
                 layerInfo = next((item for item in layersInfoList if item["Table"] == layerProperty['table_name']), None)
                 if layerInfo:
@@ -204,7 +205,7 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
             self.uri.setDataSource(uriInfo['table_schema'], uriInfo['table_name'], uriInfo['geometry_column'], "")
    
             # Add to QGIS canvas and keep a pointer for event handling
-            layer = MikecLayer(self.uri, uriInfo['layer_name'], uriInfo["spatial_type"], self.loadedLayers)
+            layer = MikecLayer(self.uri, uriInfo['layer_name'], uriInfo["spatial_type"], uriInfo["mc_connection_name"], self.loadedLayers)
    
         self.btnOpen.setText(originalText)
         self.btnOpen.setEnabled(True)

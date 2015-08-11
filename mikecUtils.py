@@ -21,11 +21,11 @@
  ***************************************************************************/
 """
 from PyQt4.QtCore import *
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 import os
 import re
 import subprocess
-
+from qgis.gui import QgsCredentialDialog
 
 
 class mikecUtils:
@@ -81,13 +81,44 @@ class mikecUtils:
         mc2qgisCmd = mc2qgisCmd+" -v addtif@"+rasterPath+"@"+group
         returncode, output = mikecUtils.run_mc2qgis(mc2qgisCmd)
 
-        #print output
-
         if returncode != 0:
             return False
         else:
             return True
+    
+    @staticmethod
+    # Change the layer name in MIKE C database
+    def changeLayerName(mcConnectionName, uri, newName):
         
+        # The password and username required for mc2qgis are not the database password and username 
+        # stored in URI but the MC connection password and username stored in MC connection settings
+        settings = QtCore.QSettings()
+        password = settings.value(mikecUtils.baseKey + mcConnectionName + "/password")
+        username = settings.value(mikecUtils.baseKey + mcConnectionName + "/username")
+        
+        # Ask for username/password if not provided
+        if not (username and password):
+            credentialDialog = QgsCredentialDialog()
+            ok, newUsername, newPassword = credentialDialog.request('MIKE C', username, password, '')
+            if ok:
+                username = newUsername
+                password = newPassword
+            else:
+                QtGui.QMessageBox.information( None,
+                                            mikecUtils.tr( "Name not changed in the database" ),
+                                            mikecUtils.tr( "Username or password not provided" ) )
+                return False
+        
+        # Create and call mc2qgis command
+        mc2qgisCmd = '-c "database='+uri.database()+';host='+uri.host()+';port='+uri.port()+';dbflavour=PostgreSQL"'
+        mc2qgisCmd = mc2qgisCmd +' -u '+username+' -p '+password+' -w '+uri.schema()
+        mc2qgisCmd = mc2qgisCmd+' -v changename@"'+uri.table()+'"@"'+newName+'"'
+        returncode, _ = mikecUtils.run_mc2qgis(mc2qgisCmd)
+
+        if returncode != 0:
+            return False
+        else:
+            return True     
     
     @staticmethod
     # Get the information about MIKE C layers from mc2qigs utility program

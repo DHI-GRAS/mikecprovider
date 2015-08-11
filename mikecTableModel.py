@@ -36,6 +36,7 @@ class mikecTableModel(QtGui.QStandardItemModel):
     def addTableEntry(self, layerProperty):
         
         childItemList = []
+        childItemList.append(QtGui.QStandardItem(layerProperty['mc_connection_name']))
         childItemList.append(QtGui.QStandardItem(layerProperty['layer_name']))
         childItemList.append(QtGui.QStandardItem(layerProperty['table_path']))
         childItemList.append(QtGui.QStandardItem(layerProperty['table_type']))
@@ -50,6 +51,7 @@ class mikecTableModel(QtGui.QStandardItemModel):
     def setHeader(self):
         
         headerLabels = []
+        headerLabels.append(utils.tr( "MC Connection" ))
         headerLabels.append(utils.tr( "Name" ))
         headerLabels.append(utils.tr( "Path"))
         headerLabels.append(utils.tr( "Spatial Type"))
@@ -68,16 +70,17 @@ class mikecTableModel(QtGui.QStandardItemModel):
         if not index: 
             return None
         
-        uriInfo["layer_name"] = index.sibling( index.row(), 0 ).data()
-        uriInfo["spatial_type"] = index.sibling( index.row(), 2 ).data()
-        uriInfo["table_name"] = index.sibling( index.row(), 5 ).data()
-        uriInfo["table_schema"] = index.sibling( index.row(), 6 ).data()
-        uriInfo["geometry_column"] = index.sibling( index.row(), 7 ).data()
+        uriInfo["mc_connection_name"] = index.sibling( index.row(), 0 ).data()
+        uriInfo["layer_name"] = index.sibling( index.row(), 1 ).data()
+        uriInfo["spatial_type"] = index.sibling( index.row(), 3 ).data()
+        uriInfo["table_name"] = index.sibling( index.row(), 6 ).data()
+        uriInfo["table_schema"] = index.sibling( index.row(), 7 ).data()
+        uriInfo["geometry_column"] = index.sibling( index.row(), 8 ).data()
         
         return uriInfo
     
     # List of columns which are storying information but are not for showing in the GUI
     def getColumnWidths(self):
-        return[155, 160, 90, 45, 100, 0, 0, 0]
+        return[0, 155, 160, 90, 45, 100, 0, 0, 0]
 
         
