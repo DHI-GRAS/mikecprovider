@@ -27,7 +27,7 @@ from PyQt4 import QtGui, uic, QtCore
 from qgis.core import QgsProject, QgsMapLayer, QgsRasterLayer
 
 from PyQt4.QtCore import QSettings
-from PyQt4.QtGui import QFileDialog, QMessageBox
+from PyQt4.QtGui import QFileDialog, QMessageBox, QDialogButtonBox
 
 from mikecUtils import mikecUtils as utils
 
@@ -57,13 +57,25 @@ class mikecImportRasterDialog(QtGui.QDialog, FORM_CLASS):
     def accept(self):
         layerPath = self.cmbText.itemData(self.cmbText.currentIndex())
         group = self.lineGroup.displayText()
-        if not utils.importRasterLayer(self.connection, layerPath, group):
+        
+        btnOk = self.buttonBox.button(QDialogButtonBox.Ok)
+        originalText = btnOk.text()
+        btnOk.setText(utils.tr("Importing..."))
+        btnOk.setEnabled(False)
+        btnOk.repaint()
+        
+        res = utils.importRasterLayer(self.connection, layerPath, group)
+        
+        btnOk.setText(originalText)
+        btnOk.setEnabled(True)
+        
+        if not res:
             QMessageBox.warning( self,
                utils.tr( "Could not import layer" ),
                utils.tr( "Could not import layer %s.") % (layerPath),
                QtGui.QMessageBox.Ok)
-            
-        super(mikecImportRasterDialog, self).accept()
+        else:
+            super(mikecImportRasterDialog, self).accept()
                 
     
     # List all TIF layers currently loaded in QGIS     
