@@ -21,9 +21,13 @@
  ***************************************************************************/
 """
 import re
+import os
 import uuid
 from qgis.core import *
 from qgis.gui import QgsSublayersDialog
+from processing.tools.system import tempFolder
+from processing.tools import dataobjects
+import processing
 
 from mikecUtils import mikecUtils as utils
 
@@ -31,10 +35,10 @@ logger = lambda msg: QgsMessageLog.logMessage(msg, 'MIKE C Provider', 1)
 
 class MikecLayer():
     
-    def __init__(self, uri, layerName, layerType, mikecConnection, loadedLayers):
+    def __init__(self, uri, layerName, layerType, mikecConnectionName, loadedLayers):
         
         self.uri = uri
-        self.mikecConnection = mikecConnection
+        self.mikecConnectionName = mikecConnectionName
         self.addedFeaturesIds = []
         self.changedFeaturesIds = []
         self.loadedLayers = loadedLayers
@@ -50,8 +54,8 @@ class MikecLayer():
             gdalUri = gdalUri +" table="+self.uri.table() 
             self.layer = QgsRasterLayer(gdalUri, layerName, "gdal")
             if self.layer and self.layer.dataProvider().name() == "gdal" and len(self.layer.subLayers()) > 1:
-                self.loadSubLayers(self.layer)
-            else:
+                self.layer = self.loadSubLayersVRT(self.layer)
+            if self.layer:
                 QgsMapLayerRegistry.instance().addMapLayer(self.layer)
         else:
             self.layer = QgsVectorLayer(self.uri.uri(), layerName, "postgres")
@@ -71,8 +75,33 @@ class MikecLayer():
             QgsMapLayerRegistry.instance().addMapLayer(self.layer)
              
     
-            
     # Function for loading sublayers of raster layers (rows of a table with GDAL PG mode = 1)
+    # All the sublayers are loaded and combined in a GDAL VRT file so that to the user they look
+    # like different bands of the same raster
+    def loadSubLayersVRT(self, rl):
+        layerName = rl.name()
+        
+        # List all of the sublayers in a format required by GDAL Build VRT
+        inputFileList = ""
+        for subLayer in rl.subLayers():
+            subLayer = re.sub("(where=.*= )", "\g<1>\\'", subLayer)
+            subLayer = re.sub("'$", "\\''", subLayer)
+            inputFileList = inputFileList + subLayer + ";"          
+        inputFileList = inputFileList[:-1]
+        
+        options = {"INPUT":inputFileList, "RESOLUTION":0, "SEPARATE":True, "PROJ_DIFFERENCE":False, "OUTPUT": None}
+        out = processing.runalg("gdalogr:buildvirtualraster", options) 
+        dataobjects.resetLoadedLayers()
+        if out:
+            vrtLayer = QgsRasterLayer(out["OUTPUT"], layerName)
+            return vrtLayer
+        return None
+        
+    
+    # THIS FUNCTION IS NO LONGER USED BUT IS KEPT IN CASE IT IS NEEDED IN THE FUTURE        
+    # Function for loading sublayers of raster layers (rows of a table with GDAL PG mode = 1)
+    # Displays the list of sublayers and the user can select which ones to load. Each sublayer is loaded as a 
+    # separate raster
     def loadSubLayers(self, rl):
         tableContent = []
         subLayers = []
@@ -150,7 +179,7 @@ class MikecLayer():
                  
     
     def layer_name_changed(self):
-        utils.changeLayerName(self.mikecConnection, self.uri, self.layer.name())
+        utils.changeLayerName(self.mikecConnectionName, self.uri, self.layer.name())
              
     def layer_deleted(self):
         self.loadedLayers.remove(self)       
