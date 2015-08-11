@@ -46,7 +46,10 @@ class MikecLayer():
         
         self.loadedLayers.append(self)
         
+        #========================================
         # Add to QGIS
+        
+        # Rasters
         if layerType == "RASTER":
             gdalUri = "PG: dbname="+self.uri.database()+" host="+self.uri.host()+" user="+self.uri.username()
             gdalUri = gdalUri +" password="+self.uri.password()+" port="+self.uri.port()+" mode=1"
@@ -55,12 +58,15 @@ class MikecLayer():
             self.layer = QgsRasterLayer(gdalUri, layerName, "gdal")
             if self.layer and self.layer.dataProvider().name() == "gdal" and len(self.layer.subLayers()) > 1:
                 self.layer = self.loadSubLayersVRT(self.layer)
-            if self.layer:
-                QgsMapLayerRegistry.instance().addMapLayer(self.layer)
+        
+            # Make slot connections
+            self.layer.layerNameChanged.connect(self.layer_name_changed)
+        
+        # Vectors    
         else:
             self.layer = QgsVectorLayer(self.uri.uri(), layerName, "postgres")
             
-            # Make connections
+            # Make slot connections
             self.layer.editingStarted.connect(self.editing_started)
             self.layer.featureAdded.connect(self.feature_added)
             self.layer.attributeValueChanged.connect(self.attribute_value_changed)
@@ -71,8 +77,11 @@ class MikecLayer():
             self.layer.layerNameChanged.connect(self.layer_name_changed)
             self.layer.layerDeleted.connect(self.layer_deleted)
             
-            # Display on canvas
+        # Display on canvas
+        if self.layer:
             QgsMapLayerRegistry.instance().addMapLayer(self.layer)
+        else:
+            self.layer_deleted()
              
     
     # Function for loading sublayers of raster layers (rows of a table with GDAL PG mode = 1)
