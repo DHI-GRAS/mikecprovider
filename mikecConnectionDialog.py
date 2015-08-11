@@ -55,6 +55,7 @@ class mikecConnectionDialog(QtGui.QDialog, FORM_CLASS):
             key = utils.baseKey+connName
             
             self.txtName.setText( connName )
+            self.txtName.setReadOnly(True)
             self.txtHost.setText( settings.value(key + '/host') )
             self.txtPort.setText( settings.value(key + '/port') )
             self.txtDatabase.setText( settings.value(key + '/database') )
