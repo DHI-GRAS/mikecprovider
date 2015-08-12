@@ -74,14 +74,21 @@ class mikecUtils:
     
     @staticmethod
     # Import the raster layer to MIKE C database
-    def importRasterLayer(connection, rasterPath, group):
+    def importRasterLayer(mcConnectionName, rasterPath, group):
         
         if not group.startswith("/"):
             group = "/"+group
+            
+        # Get MC connection username and password
+        username, password = mikecUtils.getMcUsernameAndPassword(mcConnectionName, "Raster not imported", "Username or password not provided")
+        if not (username and password):
+            return False
         
         # Prepare and run the mc2qgis command
-        mc2qgisCmd = '-c "database='+connection["database"]+';host='+connection["host"]+';port='+str(connection["port"])+';dbflavour=PostgreSQL"'
-        mc2qgisCmd = mc2qgisCmd +' -u '+connection["username"]+' -p '+connection["password"]+' -w '+connection["workspace"]
+        settings = QtCore.QSettings()
+        key = mikecUtils.baseKey + mcConnectionName
+        mc2qgisCmd = '-c "database='+settings.value(key + '/database')+';host='+settings.value(key + '/host')+';port='+settings.value(key + '/port')
+        mc2qgisCmd = mc2qgisCmd + ';dbflavour=PostgreSQL"' + ' -u '+username+' -p '+password+' -w '+settings.value(key + '/workspace')
         mc2qgisCmd = mc2qgisCmd+' -v addtif@"'+rasterPath+'"@"'+group+'"'
         returncode, _ = mikecUtils.run_mc2qgis(mc2qgisCmd)
 
@@ -96,22 +103,9 @@ class mikecUtils:
         
         # The password and username required for mc2qgis are not the database password and username 
         # stored in URI but the MC connection password and username stored in MC connection settings
-        settings = QtCore.QSettings()
-        password = settings.value(mikecUtils.baseKey + mcConnectionName + "/password")
-        username = settings.value(mikecUtils.baseKey + mcConnectionName + "/username")
-        
-        # Ask for username/password if not provided
+        username, password = mikecUtils.getMcUsernameAndPassword(mcConnectionName, "Name not changed in the database", "Username or password not provided")
         if not (username and password):
-            credentialDialog = QgsCredentialDialog()
-            ok, newUsername, newPassword = credentialDialog.request('MIKE C', username, password, '')
-            if ok:
-                username = newUsername
-                password = newPassword
-            else:
-                QtGui.QMessageBox.information( None,
-                                            mikecUtils.tr( "Name not changed in the database" ),
-                                            mikecUtils.tr( "Username or password not provided" ) )
-                return False
+            return False
         
         # Create and call mc2qgis command
         mc2qgisCmd = '-c "database='+uri.database()+';host='+uri.host()+';port='+uri.port()+';dbflavour=PostgreSQL"'
@@ -161,4 +155,23 @@ class mikecUtils:
         if not QDir(tempDir).exists():
             QDir().mkpath(tempDir)
     
-        return unicode(os.path.abspath(tempDir))      
+        return unicode(os.path.abspath(tempDir))  
+    
+    @staticmethod
+    def getMcUsernameAndPassword(mcConnectionName, cancelMsgTitle = "", cancelMsgText = ""):
+        settings = QtCore.QSettings()
+        password = settings.value(mikecUtils.baseKey + mcConnectionName + "/password")
+        username = settings.value(mikecUtils.baseKey + mcConnectionName + "/username")
+        
+        # Ask for username/password if not provided
+        if not (username and password):
+            credentialDialog = QgsCredentialDialog()
+            ok, newUsername, newPassword = credentialDialog.request('MIKE C', username, password, '')
+            if ok:
+                return newUsername, newPassword
+            elif (cancelMsgTitle or cancelMsgText):
+                QtGui.QMessageBox.information( None,
+                                            mikecUtils.tr( cancelMsgTitle ),
+                                            mikecUtils.tr( cancelMsgText ) )
+            return None, None
+        return username, password    

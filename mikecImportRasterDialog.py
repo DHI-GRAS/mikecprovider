@@ -37,7 +37,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class mikecImportRasterDialog(QtGui.QDialog, FORM_CLASS):
 
-    def __init__(self, connection, parent=None):
+    def __init__(self, mcConnectionName, parent=None):
         """Constructor."""
         super(mikecImportRasterDialog, self).__init__(parent)
         # Set up the user interface from Designer.
@@ -52,7 +52,7 @@ class mikecImportRasterDialog(QtGui.QDialog, FORM_CLASS):
         
         self.btnSelect.clicked.connect(self.showSelectionDialog)
     
-        self.connection = connection
+        self.mcConnectionName = mcConnectionName
     
     def accept(self):
         layerPath = self.cmbText.itemData(self.cmbText.currentIndex())
@@ -64,7 +64,7 @@ class mikecImportRasterDialog(QtGui.QDialog, FORM_CLASS):
         btnOk.setEnabled(False)
         btnOk.repaint()
         
-        res = utils.importRasterLayer(self.connection, layerPath, group)
+        res = utils.importRasterLayer(self.mcConnectionName, layerPath, group)
         
         btnOk.setText(originalText)
         btnOk.setEnabled(True)

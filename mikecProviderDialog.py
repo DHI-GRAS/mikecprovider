@@ -79,6 +79,9 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
         # Database connection
         self.connection = None
         
+        # MIKE C connection name
+        self.mcConnectionName = ""
+        
         # References to layers loaded in the canvas
         self.loadedLayers = loadedLayers
     
@@ -104,18 +107,9 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
         database = settings.value(key + '/database')
         port = settings.value(key + '/port')
         schema = settings.value(key + '/workspace')
-        username = settings.value(key + '/username')
-        password = settings.value(key + '/password')
-        
-        # Ask for username/password if not provided
+        username, password = utils.getMcUsernameAndPassword(self.cmbConnections.currentText())
         if not (username and password):
-            credentialDialog = QgsCredentialDialog()
-            ok, newUsername, newPassword = credentialDialog.request('MIKE C', username, password, '')
-            if ok:
-                username = newUsername
-                password = newPassword
-            else:
-                return
+            return False
             
         originalText = self.btnConnect.text()
         self.btnConnect.setText(utils.tr("Connecting..."))
@@ -173,7 +167,7 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
                 self.btnOpen.setDisabled(False)
                 self.btnImportRaster.setDisabled(False)
                 
-        
+        self.mcConnectionName = self.cmbConnections.currentText()
         self.connection = None        
         self.btnConnect.setText(originalText)
         self.btnConnect.setEnabled(True)
@@ -205,7 +199,7 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
             self.uri.setDataSource(uriInfo['table_schema'], uriInfo['table_name'], uriInfo['geometry_column'], "")
    
             # Add to QGIS canvas and keep a pointer for event handling
-            layer = MikecLayer(self.uri, uriInfo['layer_name'], uriInfo["spatial_type"], uriInfo["mc_connection_name"], self.loadedLayers)
+            MikecLayer(self.uri, uriInfo['layer_name'], uriInfo["spatial_type"], uriInfo["mc_connection_name"], self.loadedLayers)
    
         self.btnOpen.setText(originalText)
         self.btnOpen.setEnabled(True)
@@ -287,6 +281,7 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
             self.setConnectionListPosition()
             
     def closeDialog(self):
+        self.mcConnectionName = ""
         self.connection = None
         self.setLayersView()
         self.btnOpen.setDisabled(True)
@@ -300,16 +295,6 @@ class mikecProviderDialog(QtGui.QDialog, FORM_CLASS):
     def importRaster(self):
         
         # Get connection details of the currently selected connection
-        settings = QtCore.QSettings()
-        connection = {}
-        key = utils.baseKey + self.cmbConnections.currentText()
-        connection["host"] = settings.value(key + '/host')
-        connection["database"] = settings.value(key + '/database')
-        connection["port"] = settings.value(key + '/port')
-        connection["workspace"] = settings.value(key + '/workspace')
-        connection["username"] = settings.value(key + '/username')
-        connection["password"] = settings.value(key + '/password')
-        
-        importRasterDialog = mikecImportRasterDialog(connection, self)
+        importRasterDialog = mikecImportRasterDialog(self.mcConnectionName, self)
         importRasterDialog.exec_()
         
