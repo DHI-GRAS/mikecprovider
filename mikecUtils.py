@@ -78,6 +78,8 @@ class mikecUtils:
         
         if not group.startswith("/"):
             group = "/"+group
+        if group.endswith("/"):
+            group = group[:-1]
             
         # Get MC connection username and password
         username, password = mikecUtils.getMcUsernameAndPassword(mcConnectionName, "Raster not imported", "Username or password not provided")
