@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?> 
+<Configuration>
+  <CommonConfiguration>
+    <hibernate-configuration xmlns="urn:nhibernate-configuration-2.2">
+      <session-factory>
+        <property name="connection.provider">DHI.Solutions.Generic.Data.DynamicConnectionProvider, DHI.Solutions.Generic.Data</property>
+        <property name="show_sql">false</property>
+        <property name="command_timeout">600</property>
+        <property name="query.substitutions">true 1, false 0, yes 'Y', no 'N'</property>
+      </session-factory>
+    </hibernate-configuration>
+  </CommonConfiguration>
+  <Databases>
+    <!--DBFlavour is the enum type in connctionUtility2-->
+    <Database type="PostgreSQL" dbflavour="PostgreSQL" defaultport="5432">
+      <hibernate-configuration xmlns="urn:nhibernate-configuration-2.2">
+        <session-factory>
+          <property name="adonet.batch_size">10</property>
+          <property name="dialect">DHI.Solutions.Generic.Data.DSSPostgreSQLDialect, DHI.Solutions.Generic.Data</property>
+          <property name="connection.driver_class">NHibernate.Driver.NpgsqlDriver</property>
+        </session-factory>
+      </hibernate-configuration>
+    </Database>
+    <Database type="Oracle" dbflavour="Oracle" defaultport="1521">
+      <hibernate-configuration xmlns="urn:nhibernate-configuration-2.2">
+        <session-factory>
+          <property name="dialect">NHibernate.Dialect.Oracle10gDialect</property>
+          <property name="connection.driver_class">NHibernate.Driver.OracleDataClientDriver</property>
+        </session-factory>
+      </hibernate-configuration>
+    </Database>
+    <Supported-database-versions>
+      <version dbflavour="PostgreSQL" dbversion="9.0" postgis="9605"></version>
+      <version dbflavour="PostgreSQL" dbversion="9.1" postgis="9605"></version>
+      <version dbflavour="PostgreSQL" dbversion="9.2" postgis="9605"></version>
+      <version dbflavour="PostgreSQL" dbversion="9.0" postgis="11128"></version>
+      <version dbflavour="PostgreSQL" dbversion="9.1" postgis="11128"></version>
+      <version dbflavour="PostgreSQL" dbversion="9.2" postgis="11128"></version>
+      <version dbflavour="PostgreSQL" dbversion="9.3" postgis="11822"></version>
+      <version dbflavour="PostgreSQL" dbversion="9.3" postgis="13152" ></version>
+    </Supported-database-versions>
+  </Databases>
+</Configuration>

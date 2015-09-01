@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<files>
+	<file
+			Name="DHI.Solutions.LicenseProvider.dll"
+			SourceDir="."
+			TargetDir="Bin"
+			Distribute="Yes"
+			Action="">
+	</file>
+	<file
+			Name="DHI.Solutions.LicenseProvider.signature"
+			SourceDir="."
+			TargetDir="Bin"
+			Distribute="Yes"
+			Action="">
+	</file>
+</files>

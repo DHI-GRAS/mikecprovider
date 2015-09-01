@@ -9,9 +9,7 @@ __pycache__/
 
 # C extensions
 *.so
-*.dll
-mc2qgis/
-mc2qgis/*
+
 
 # Distribution / packaging
 .Python

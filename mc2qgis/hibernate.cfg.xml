@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <configSections>
+    <section name ="hibernate-configuration"
+             type ="NHibernate.cfg.ConfigurationSectionHandler, NHibernate" />
+  </configSections>
+
+  <hibernate-configuration xmlns="urn:nhibernate-configuration-2.2">
+    <session-factory>
+      <property name="dialect">DHI.Solutions.Generic.Data.DSSPostgreSQLDialect, DHI.Solutions.Generic.Data</property>
+      <property name="connection.provider">DHI.Solutions.Generic.Data.DynamicConnectionProvider, DHI.Solutions.Generic.Data</property>
+      <property name="connection.driver_class">NHibernate.Driver.NpgsqlDriver</property>
+      <property name="connection.connection_string">Server=localhost;Port=5432;User Id=appuser;Password=secretappuser;Database=dhidss;Preload Reader = true;</property>
+      <!--<property name="connection.driver_class">NHibernate.Driver.OdbcDriver</property>
+      <property name="connection.connection_string">dsn=PostgreSQL35W</property>-->
+      <property name="adonet.batch_size">10</property>
+      <property name="show_sql">false</property>      
+      <property name="command_timeout">600</property>
+      <property name="query.substitutions">true 1, false 0, yes 'Y', no 'N'</property>      
+      <property name="default_schema">workspace1</property>
+    </session-factory>
+  </hibernate-configuration>
+</configuration>
