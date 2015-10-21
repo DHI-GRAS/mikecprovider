@@ -51,19 +51,20 @@ class MikecLayer():
         
         # Rasters
         if layerType == "RASTER":
-            gdalUri = "PG: dbname="+self.uri.database()+" host="+self.uri.host()+" user="+self.uri.username()
-            gdalUri = gdalUri +" password="+self.uri.password()+" port="+self.uri.port()+" mode=1"
-            gdalUri = gdalUri +" schema="+self.uri.schema()+" column="+self.uri.geometryColumn()
-            gdalUri = gdalUri +" table="+self.uri.table() 
+            gdalUri = "PG: dbname='"+self.uri.database()+"' host='"+self.uri.host()+"' user='"+self.uri.username()
+            gdalUri = gdalUri +"' password='"+self.uri.password()+"' port="+self.uri.port()+" mode=1"
+            gdalUri = gdalUri +" schema='"+self.uri.schema()+"' column='"+self.uri.geometryColumn()
+            gdalUri = gdalUri +"' table='"+self.uri.table()+"'" 
             self.layer = QgsRasterLayer(gdalUri, layerName, "gdal")
             if self.layer and self.layer.dataProvider().name() == "gdal" and len(self.layer.subLayers()) > 1:
-                self.layer = self.loadSubLayersVRT(self.layer)
+                self.layer = self.loadSubLayersVRT(self.layer, gdalUri)
         
             # Make slot connections
             self.layer.layerNameChanged.connect(self.layer_name_changed)
         
         # Vectors    
         else:
+            print self.uri.uri()
             self.layer = QgsVectorLayer(self.uri.uri(), layerName, "postgres")
             
             # Make slot connections
@@ -87,15 +88,16 @@ class MikecLayer():
     # Function for loading sublayers of raster layers (rows of a table with GDAL PG mode = 1)
     # All the sublayers are loaded and combined in a GDAL VRT file so that to the user they look
     # like different bands of the same raster
-    def loadSubLayersVRT(self, rl):
+    def loadSubLayersVRT(self, rl, gdalUri):
         layerName = rl.name()
         
         # List all of the sublayers in a format required by GDAL Build VRT
         inputFileList = ""
         for subLayer in rl.subLayers():
+            subLayer = re.search("where=.*$", subLayer).group(0)
             subLayer = re.sub("(where=.*= )", "\g<1>\\'", subLayer)
             subLayer = re.sub("'$", "\\''", subLayer)
-            inputFileList = inputFileList + subLayer + ";"          
+            inputFileList = inputFileList + gdalUri + " " + subLayer + ";"          
         inputFileList = inputFileList[:-1]
         
         options = {"INPUT":inputFileList, "RESOLUTION":0, "SEPARATE":True, "PROJ_DIFFERENCE":False, "OUTPUT": None}
