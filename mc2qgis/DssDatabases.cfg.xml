@@ -3,7 +3,7 @@
   <CommonConfiguration>
     <hibernate-configuration xmlns="urn:nhibernate-configuration-2.2">
       <session-factory>
-        <property name="connection.provider">DHI.Solutions.Generic.Data.DynamicConnectionProvider, DHI.Solutions.Generic.Data</property>
+        <property name="connection.provider">NHibernate.Connection.DriverConnectionProvider</property>
         <property name="show_sql">false</property>
         <property name="command_timeout">600</property>
         <property name="query.substitutions">true 1, false 0, yes 'Y', no 'N'</property>
@@ -37,7 +37,7 @@
       <version dbflavour="PostgreSQL" dbversion="9.1" postgis="11128"></version>
       <version dbflavour="PostgreSQL" dbversion="9.2" postgis="11128"></version>
       <version dbflavour="PostgreSQL" dbversion="9.3" postgis="11822"></version>
-      <version dbflavour="PostgreSQL" dbversion="9.3" postgis="13152" ></version>
+	  <version dbflavour="PostgreSQL" dbversion="9.4" postgis="13780"></version>
     </Supported-database-versions>
   </Databases>
 </Configuration>

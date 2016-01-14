@@ -8,7 +8,7 @@
   <hibernate-configuration xmlns="urn:nhibernate-configuration-2.2">
     <session-factory>
       <property name="dialect">DHI.Solutions.Generic.Data.DSSPostgreSQLDialect, DHI.Solutions.Generic.Data</property>
-      <property name="connection.provider">DHI.Solutions.Generic.Data.DynamicConnectionProvider, DHI.Solutions.Generic.Data</property>
+      <property name="connection.provider">NHibernate.Connection.DriverConnectionProvider</property>
       <property name="connection.driver_class">NHibernate.Driver.NpgsqlDriver</property>
       <property name="connection.connection_string">Server=localhost;Port=5432;User Id=appuser;Password=secretappuser;Database=dhidss;Preload Reader = true;</property>
       <!--<property name="connection.driver_class">NHibernate.Driver.OdbcDriver</property>
