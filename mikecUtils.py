@@ -48,7 +48,7 @@ class mikecUtils:
     @staticmethod
     # Run the mc2qigs utility program
     def run_mc2qgis(mc2qgisCmd, showErrorBox = True):
-        mc2qgisCmd = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mc2qgis", "mc2qgis.exe ") + mc2qgisCmd
+        mc2qgisCmd = '"' + os.path.join(os.path.dirname(os.path.abspath(__file__)), "mc2qgis", "mc2qgis.exe" + '" ') + mc2qgisCmd
         
         # Then run it
         out = ""
