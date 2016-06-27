@@ -37,7 +37,10 @@
       <version dbflavour="PostgreSQL" dbversion="9.1" postgis="11128"></version>
       <version dbflavour="PostgreSQL" dbversion="9.2" postgis="11128"></version>
       <version dbflavour="PostgreSQL" dbversion="9.3" postgis="11822"></version>
-	  <version dbflavour="PostgreSQL" dbversion="9.4" postgis="13780"></version>
-    </Supported-database-versions>
+	  <version dbflavour="PostgreSQL" dbversion="9.3" postgis="12547"></version>
+      <version dbflavour="PostgreSQL" dbversion="9.3" postgis="13152"></version>
+      <version dbflavour="PostgreSQL" dbversion="9.4" postgis="13780"></version>
+      <version dbflavour="PostgreSQL" dbversion="9.5" postgis="14555"></version>
+	</Supported-database-versions>
   </Databases>
 </Configuration>
